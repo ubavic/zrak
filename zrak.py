@@ -12,10 +12,12 @@ sfere = [
     {'centar': np.array([0, -10001, 0]),'pprecnik': 10000, 'boja': np.array([1, 1, 1])},
 ]
 
-izvorSvetlosti = {
-    'centar': np.array([-2, 5, 0]),
-    'boja': np.array([30, 30, 30])
-}
+izvoriSvetlosti = [
+    {'centar': np.array([-2, 5, 0]), 'boja': np.array([20, 20, 20])},
+    {'centar': np.array([3, 0, -6]), 'boja': np.array([0, 0, 1])},
+    {'centar': np.array([2.7, 0, -4]), 'boja': np.array([1, 0, 0])},
+    {'centar': np.array([4, 0, -5]), 'boja': np.array([0, 1, 0])},
+]
 
 
 def duzina(vektor):
@@ -100,26 +102,28 @@ for i in range(visina):
 
         if tackaPrvogPreseka is not None:
             normalaSfere = normiraj(tackaPrvogPreseka - najblizaSfera['centar'])
-            pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
-            zrakSenke = {
-                'pravac': pravacKaSvetlu,
-                'tacka': tackaPrvogPreseka
-            }
 
-            for sfera in sfere:
-                zrakSenkeSeceSferu, presekZrakaSenke = presekZrakaISfere(zrakSenke, sfera)
+            for izvorSvetlosti in izvoriSvetlosti:
+                pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+                zrakSenke = {
+                    'pravac': pravacKaSvetlu,
+                    'tacka': tackaPrvogPreseka
+                }
 
-                if zrakSenkeSeceSferu and duzina(presekZrakaSenke - tackaPrvogPreseka) < duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka):
-                    uSenci = 1
-                    break
-                else:
-                    uSenci = 0
+                for sfera in sfere:
+                    zrakSenkeSeceSferu, presekZrakaSenke = presekZrakaISfere(zrakSenke, sfera)
 
-            if not uSenci:
-                kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
-                rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
-                osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
-                boja = najblizaSfera['boja'] * osvetljenje
+                    if zrakSenkeSeceSferu and duzina(presekZrakaSenke - tackaPrvogPreseka) < duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka):
+                        uSenci = 1
+                        break
+                    else:
+                        uSenci = 0
+
+                if not uSenci:
+                    kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
+                    rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+                    osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
+                    boja = boja + najblizaSfera['boja'] * osvetljenje
 
         slika[i, j] = np.clip(boja, 0, 1)
 

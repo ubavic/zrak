@@ -6,7 +6,7 @@ Jednostavan *raytracer* napisan u *Python* jeziku.
 
 Za pokretanje programa potrebno je da imate instalirano *Python* okruženje kao i pakete `numpy` i `matplotlib` (ovi paketi se mogu instalirati pomoću `pip install` komande).
 
-Unutar repozitorijuma pokrenite komandu `python3 zrak.py`. Kroz par desetina sekundi bi trebalo da dobijete fajl `slika.png`.
+Unutar repozitorijuma pokrenite komandu `python3 zrak.py`. Kroz par minuta bi trebalo da dobijete fajl `slika.png`.
 
 ## Licenca
 
