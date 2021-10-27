@@ -25,6 +25,16 @@ def normiraj(vektor):
         return vektor/d
 
 
+def kosinusUgla(vektorA, vektorB):
+    a = duzina(vektorA)
+    b = duzina(vektorB)
+
+    if a == 0 or b == 0:
+        return 1
+    else:
+        return np.dot(vektorA, vektorB)/(a * b)
+
+
 def resenjaKvadratneJednacine(a, b, c):
     D = b**2 - 4 * a * c
 
