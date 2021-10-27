@@ -1,8 +1,23 @@
 import numpy as np
 import matplotlib.pyplot
+import math
 
 sirina = 1000
 visina = 600
+
+
+def duzina(vektor):
+    return math.sqrt(np.dot(vektor, vektor))
+
+
+def normiraj(vektor):
+    d = duzina(vektor)
+
+    if d == 0:
+        return vektor
+    else:
+        return vektor/d
+
 
 slika = np.zeros((visina, sirina, 3))
 
