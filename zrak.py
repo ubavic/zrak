@@ -70,6 +70,56 @@ def presekZrakaISfere(zrak, sfera):
     return (0, None)
 
 
+def bojaZraka(zrak, dubina):
+    udaljenostPrvogPreseka = math.inf
+    boja = np.array([0, 0, 0])
+    tackaPrvogPreseka = None
+    najblizaSfera = None
+
+    if dubina == 0:
+        return boja
+
+    for sfera in sfere:
+        zrakSeceSferu, tackaPreseka = presekZrakaISfere(zrak, sfera)
+
+        if not zrakSeceSferu:
+            continue
+
+        duzinaZraka = duzina(tackaPreseka - zrak['tacka'])
+
+        if duzinaZraka < udaljenostPrvogPreseka:
+            udaljenostPrvogPreseka = duzinaZraka
+            tackaPrvogPreseka = tackaPreseka
+            najblizaSfera = sfera
+
+    if tackaPrvogPreseka is not None:
+        normalaSfere = normiraj(tackaPrvogPreseka - najblizaSfera['centar'])
+
+        for izvorSvetlosti in izvoriSvetlosti:
+            pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+            zrakSenke = {
+                'pravac': pravacKaSvetlu,
+                'tacka': tackaPrvogPreseka
+            }
+
+            for sfera in sfere:
+                zrakSenkeSeceSferu, presekZrakaSenke = presekZrakaISfere(zrakSenke, sfera)
+
+                if zrakSenkeSeceSferu and duzina(presekZrakaSenke - tackaPrvogPreseka) < duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka):
+                    uSenci = 1
+                    break
+                else:
+                    uSenci = 0
+
+            if not uSenci:
+                kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
+                rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+                osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
+                boja = boja + najblizaSfera['boja'] * osvetljenje
+
+    return boja
+
+
 formatSlike = sirina/visina
 slika = np.zeros((visina, sirina, 3))
 
@@ -82,49 +132,7 @@ for i in range(visina):
             'pravac': normiraj(np.array([x, y, -1])),
             'tacka': np.array([0, 0, 0])
         }
-        udaljenostPrvogPreseka = math.inf
-        boja = np.array([0, 0, 0])
-        tackaPrvogPreseka = None
-        najblizaSfera = None
-
-        for sfera in sfere:
-            zrakSeceSferu, tackaPreseka = presekZrakaISfere(zrak, sfera)
-
-            if not zrakSeceSferu:
-                continue
-
-            duzinaZraka = duzina(tackaPreseka - zrak['tacka'])
-
-            if duzinaZraka < udaljenostPrvogPreseka:
-                udaljenostPrvogPreseka = duzinaZraka
-                tackaPrvogPreseka = tackaPreseka
-                najblizaSfera = sfera
-
-        if tackaPrvogPreseka is not None:
-            normalaSfere = normiraj(tackaPrvogPreseka - najblizaSfera['centar'])
-
-            for izvorSvetlosti in izvoriSvetlosti:
-                pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
-                zrakSenke = {
-                    'pravac': pravacKaSvetlu,
-                    'tacka': tackaPrvogPreseka
-                }
-
-                for sfera in sfere:
-                    zrakSenkeSeceSferu, presekZrakaSenke = presekZrakaISfere(zrakSenke, sfera)
-
-                    if zrakSenkeSeceSferu and duzina(presekZrakaSenke - tackaPrvogPreseka) < duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka):
-                        uSenci = 1
-                        break
-                    else:
-                        uSenci = 0
-
-                if not uSenci:
-                    kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
-                    rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
-                    osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
-                    boja = boja + najblizaSfera['boja'] * osvetljenje
-
-        slika[i, j] = np.clip(boja, 0, 1)
+        
+        slika[i, j] = np.clip(bojaZraka(zrak, 1), 0, 1)
 
 matplotlib.pyplot.imsave('slika.png', slika)
