@@ -5,10 +5,11 @@ import math
 sirina = 1000
 visina = 600
 
-sfera1 = {
-    'centar': np.array([0, 0, -4]),
-    'pprecnik': 1
-}
+sfere = [
+    {'centar': np.array([0, 0, -4]), 'pprecnik': 1, 'boja': np.array([1, 0, 0])},
+    {'centar': np.array([-1, 0, -3]), 'pprecnik': 0.5, 'boja': np.array([0, 1, 0])},
+    {'centar': np.array([0.8, 1, -4]), 'pprecnik': 0.3, 'boja': np.array([0, 0, 1])}
+]
 
 
 def duzina(vektor):
@@ -34,13 +35,21 @@ def resenjaKvadratneJednacine(a, b, c):
 
 
 def presekZrakaISfere(zrak, sfera):
-    ss = np.dot(sfera['centar'], sfera['centar'])
-    sz = np.dot(sfera['centar'], zrak['pravac'])
+    sz = np.dot(sfera['centar'] - zrak['tacka'], zrak['pravac'])
 
-    if sz > 0 and ss - sz * sz < sfera['pprecnik']:
-        return 1
+    if sz > 0:
+        a = np.dot(zrak['pravac'], zrak['pravac'])
+        b = 2 * np.dot(zrak['pravac'], zrak['tacka'] - sfera['centar'])
+        c = np.dot(zrak['tacka'] - sfera['centar'],
+                   zrak['tacka'] - sfera['centar']) - sfera['pprecnik']**2
+        t1, _ = resenjaKvadratneJednacine(a, b, c)
 
-    return 0
+        if t1 is None:
+            return (0, None)
+
+        return (1, zrak['tacka'] + t1 * zrak['pravac'])
+
+    return (0, None)
 
 
 formatSlike = sirina/visina
@@ -55,10 +64,21 @@ for i in range(visina):
             'pravac': normiraj(np.array([x, y, -1])),
             'tacka': np.array([0, 0, 0])
         }
+        udaljenostPrvogPreseka = math.inf
+        boja = np.array([0, 0, 0])
 
-        if presekZrakaISfere(zrak, sfera1):
-            slika[i, j] = np.array([1, 1, 1])
-        else:
-            slika[i, j] = np.array([0, 0, 0])
+        for sfera in sfere:
+            zrakSeceSferu, tackaPreseka = presekZrakaISfere(zrak, sfera)
+
+            if not zrakSeceSferu:
+                continue
+
+            duzinaZraka = duzina(tackaPreseka - zrak['tacka'])
+
+            if duzinaZraka < udaljenostPrvogPreseka:
+                udaljenostPrvogPreseka = duzinaZraka
+                boja = sfera['boja']
+
+        slika[i, j] = boja
 
 matplotlib.pyplot.imsave('slika.png', slika)
