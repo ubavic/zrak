@@ -101,10 +101,25 @@ for i in range(visina):
         if tackaPrvogPreseka is not None:
             normalaSfere = normiraj(tackaPrvogPreseka - najblizaSfera['centar'])
             pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
-            kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
-            rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
-            osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
-            boja = najblizaSfera['boja'] * osvetljenje
+            zrakSenke = {
+                'pravac': pravacKaSvetlu,
+                'tacka': tackaPrvogPreseka
+            }
+
+            for sfera in sfere:
+                zrakSenkeSeceSferu, presekZrakaSenke = presekZrakaISfere(zrakSenke, sfera)
+
+                if zrakSenkeSeceSferu and duzina(presekZrakaSenke - tackaPrvogPreseka) < duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka):
+                    uSenci = 1
+                    break
+                else:
+                    uSenci = 0
+
+            if not uSenci:
+                kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
+                rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+                osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
+                boja = najblizaSfera['boja'] * osvetljenje
 
         slika[i, j] = np.clip(boja, 0, 1)
 
