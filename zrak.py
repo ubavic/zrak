@@ -8,7 +8,8 @@ visina = 600
 sfere = [
     {'centar': np.array([0, 0, -4]), 'pprecnik': 1, 'boja': np.array([1, 0, 0])},
     {'centar': np.array([-1, 0, -3]), 'pprecnik': 0.5, 'boja': np.array([0, 1, 0])},
-    {'centar': np.array([0.8, 1, -4]), 'pprecnik': 0.3, 'boja': np.array([0, 0, 1])}
+    {'centar': np.array([0.8, 1, -4]),'pprecnik': 0.3, 'boja': np.array([0, 0, 1])},
+    {'centar': np.array([0, -10001, 0]),'pprecnik': 10000, 'boja': np.array([1, 1, 1])},
 ]
 
 izvorSvetlosti = {
