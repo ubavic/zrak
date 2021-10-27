@@ -11,6 +11,11 @@ sfere = [
     {'centar': np.array([0.8, 1, -4]), 'pprecnik': 0.3, 'boja': np.array([0, 0, 1])}
 ]
 
+izvorSvetlosti = {
+    'centar': np.array([-2, 5, 0]),
+    'boja': np.array([30, 30, 30])
+}
+
 
 def duzina(vektor):
     return math.sqrt(np.dot(vektor, vektor))
@@ -76,6 +81,8 @@ for i in range(visina):
         }
         udaljenostPrvogPreseka = math.inf
         boja = np.array([0, 0, 0])
+        tackaPrvogPreseka = None
+        najblizaSfera = None
 
         for sfera in sfere:
             zrakSeceSferu, tackaPreseka = presekZrakaISfere(zrak, sfera)
@@ -87,8 +94,17 @@ for i in range(visina):
 
             if duzinaZraka < udaljenostPrvogPreseka:
                 udaljenostPrvogPreseka = duzinaZraka
-                boja = sfera['boja']
+                tackaPrvogPreseka = tackaPreseka
+                najblizaSfera = sfera
 
-        slika[i, j] = boja
+        if tackaPrvogPreseka is not None:
+            normalaSfere = normiraj(tackaPrvogPreseka - najblizaSfera['centar'])
+            pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+            kosinus = kosinusUgla(pravacKaSvetlu, normalaSfere)
+            rastojanje = duzina(izvorSvetlosti['centar'] - tackaPrvogPreseka)
+            osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
+            boja = najblizaSfera['boja'] * osvetljenje
+
+        slika[i, j] = np.clip(boja, 0, 1)
 
 matplotlib.pyplot.imsave('slika.png', slika)
