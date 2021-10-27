@@ -24,6 +24,15 @@ def normiraj(vektor):
         return vektor/d
 
 
+def resenjaKvadratneJednacine(a, b, c):
+    D = b**2 - 4 * a * c
+
+    if D < 0:
+        return (None, None)
+    else:
+        return ((-b - math.sqrt(D))/(2 * a), (-b + math.sqrt(D))/(2 * a))
+
+
 def presekZrakaISfere(zrak, sfera):
     ss = np.dot(sfera['centar'], sfera['centar'])
     sz = np.dot(sfera['centar'], zrak['pravac'])
