@@ -4,6 +4,10 @@ import math
 
 sirina = 1000
 visina = 600
+gledajOd = np.array([2, 1, 0])
+gledajKa = np.array([0, -0.5, -6])
+nagibKamere = -0.2
+zizinaDaljina = 1
 
 sfere = [
     {'centar': np.array([0, 0, -4]), 'pprecnik': 1, 'boja': np.array([1, 0, 0]), 'reflektivnost': 0.2},
@@ -177,7 +181,12 @@ def bojaZraka(zrak, dubina):
 
     return boja
 
-
+gore = np.array([0, 1, 0])
+pravacKamere = zizinaDaljina * normiraj(gledajKa - gledajOd)
+vv_ = normiraj(np.cross(pravacKamere, gore))
+vh_ = np.cross(vv_, pravacKamere)
+vv = math.cos(nagibKamere) * vv_ + math.sin(nagibKamere) * vh_
+vh = -math.sin(nagibKamere) * vv_ + math.cos(nagibKamere) * vh_
 formatSlike = sirina/visina
 slika = np.zeros((visina, sirina, 3))
 
@@ -187,8 +196,8 @@ for i in range(visina):
     for j in range(sirina):
         x = -1 + 2 * j/sirina
         zrak = {
-            'pravac': normiraj(np.array([x, y, -1])),
-            'tacka': np.array([0, 0, 0])
+            'pravac': normiraj(pravacKamere + x * vv + y * vh),
+            'tacka': gledajOd
         }
         
         slika[i, j] = np.clip(bojaZraka(zrak, 8), 0, 1)
