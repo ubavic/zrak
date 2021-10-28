@@ -6,10 +6,11 @@ sirina = 1000
 visina = 600
 
 sfere = [
-    {'centar': np.array([0, 0, -4]), 'pprecnik': 1, 'boja': np.array([1, 0, 0])},
+    {'centar': np.array([0, 0, -4]), 'pprecnik': 1, 'boja': np.array([1, 0, 0]), 'reflektivnost': 0.2},
     {'centar': np.array([-1, 0, -3]), 'pprecnik': 0.5, 'boja': np.array([0, 1, 0])},
-    {'centar': np.array([0.8, 1, -4]),'pprecnik': 0.3, 'boja': np.array([0, 0, 1])},
-    {'centar': np.array([0, -10001, 0]),'pprecnik': 10000, 'boja': np.array([1, 1, 1])},
+    {'centar': np.array([0.8, 1, -4]), 'pprecnik': 0.3, 'boja': np.array([0, 0, 1])},
+    {'centar': np.array([0, -10001, 0]), 'pprecnik': 10000, 'boja': np.array([1, 1, 1])},
+    {'centar': np.array([1, -0.7, -3.5]), 'pprecnik': 0.3, 'boja': np.array([1, 1, 1]), 'reflektivnost': 1},
 ]
 
 izvoriSvetlosti = [
@@ -17,6 +18,7 @@ izvoriSvetlosti = [
     {'centar': np.array([3, 0, -6]), 'boja': np.array([0, 0, 1])},
     {'centar': np.array([2.7, 0, -4]), 'boja': np.array([1, 0, 0])},
     {'centar': np.array([4, 0, -5]), 'boja': np.array([0, 1, 0])},
+    {'centar': np.array([2, 0, 0]), 'boja': np.array([5, 5, 5])},
 ]
 
 
@@ -117,6 +119,13 @@ def bojaZraka(zrak, dubina):
                 osvetljenje = kosinus * izvorSvetlosti['boja'] / rastojanje**2
                 boja = boja + najblizaSfera['boja'] * osvetljenje
 
+        if 'reflektivnost' in najblizaSfera:
+            reflektovanZrak = {
+                'pravac': zrak['pravac'] - 2 * np.dot(zrak['pravac'], normalaSfere) * normalaSfere,
+                'tacka': tackaPrvogPreseka
+            }
+            boja = (1 - najblizaSfera['reflektivnost']) * boja + najblizaSfera['reflektivnost'] * bojaZraka(reflektovanZrak, dubina - 1)
+
     return boja
 
 
@@ -133,6 +142,6 @@ for i in range(visina):
             'tacka': np.array([0, 0, 0])
         }
         
-        slika[i, j] = np.clip(bojaZraka(zrak, 1), 0, 1)
+        slika[i, j] = np.clip(bojaZraka(zrak, 8), 0, 1)
 
 matplotlib.pyplot.imsave('slika.png', slika)
