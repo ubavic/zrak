@@ -14,11 +14,11 @@ sfere = [
 ]
 
 izvoriSvetlosti = [
-    {'centar': np.array([-2, 5, 0]), 'boja': np.array([20, 20, 20])},
-    {'centar': np.array([3, 0, -6]), 'boja': np.array([0, 0, 1])},
-    {'centar': np.array([2.7, 0, -4]), 'boja': np.array([1, 0, 0])},
-    {'centar': np.array([4, 0, -5]), 'boja': np.array([0, 1, 0])},
-    {'centar': np.array([2, 0, 0]), 'boja': np.array([5, 5, 5])},
+    {'centar': np.array([-2, 5, 0]), 'boja': np.array([20, 20, 20]), 'emisija': True, 'pprecnik': 1},
+    {'centar': np.array([3, 0, -6]), 'boja': np.array([0, 0, 1]), 'emisija': True, 'pprecnik': 0.2},
+    {'centar': np.array([2.7, 0, -4]), 'boja': np.array([1, 0, 0]), 'emisija': True, 'pprecnik': 0.2},
+    {'centar': np.array([4, 0, -5]), 'boja': np.array([0, 1, 0]), 'emisija': True, 'pprecnik': 0.2},
+    {'centar': np.array([2, 0, 0]), 'boja': np.array([5, 5, 5]), 'emisija': True, 'pprecnik': 0.2},
 ]
 
 
@@ -93,9 +93,30 @@ def bojaZraka(zrak, dubina):
             udaljenostPrvogPreseka = duzinaZraka
             tackaPrvogPreseka = tackaPreseka
             najblizaSfera = sfera
+    
+    for izvorSvetlosti in izvoriSvetlosti:
+        zrakSeceSferu, tackaPreseka = presekZrakaISfere(zrak, izvorSvetlosti)
+        
+        if not zrakSeceSferu:
+            continue
+        
+        duzinaZraka = duzina(tackaPreseka - zrak['tacka'])
+        
+        if duzinaZraka < udaljenostPrvogPreseka:
+            udaljenostPrvogPreseka = duzinaZraka
+            tackaPrvogPreseka = tackaPreseka
+            najblizaSfera = izvorSvetlosti
 
     if tackaPrvogPreseka is not None:
         normalaSfere = normiraj(tackaPrvogPreseka - najblizaSfera['centar'])
+
+        if 'emisija' in najblizaSfera:
+            k = np.clip(1.5 * pow(abs(kosinusUgla(zrak['pravac'], normalaSfere)), 5), 0, 1)
+            propustenZrak = {
+                'pravac': zrak['pravac'],
+                'tacka': tackaPrvogPreseka - 2 * np.dot(zrak['pravac'], normalaSfere) * najblizaSfera['pprecnik'] * zrak['pravac']
+            }
+            return k * najblizaSfera['boja'] + (1 - k) * bojaZraka(propustenZrak, dubina - 1)
 
         for izvorSvetlosti in izvoriSvetlosti:
             pravacKaSvetlu = normiraj(izvorSvetlosti['centar'] - tackaPrvogPreseka)
