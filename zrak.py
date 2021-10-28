@@ -200,6 +200,6 @@ for i in range(visina):
             'tacka': gledajOd
         }
         
-        slika[i, j] = np.clip(bojaZraka(zrak, 8), 0, 1)
+        slika[i, j] = np.clip(pow(bojaZraka(zrak, 8), 0.7), 0, 1)
 
 matplotlib.pyplot.imsave('slika.png', slika)
