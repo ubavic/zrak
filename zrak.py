@@ -11,6 +11,7 @@ sfere = [
     {'centar': np.array([0.8, 1, -4]), 'pprecnik': 0.3, 'boja': np.array([0, 0, 1])},
     {'centar': np.array([0, -10001, 0]), 'pprecnik': 10000, 'boja': np.array([1, 1, 1])},
     {'centar': np.array([1, -0.7, -3.5]), 'pprecnik': 0.3, 'boja': np.array([1, 1, 1]), 'reflektivnost': 1},
+    {'centar': np.array([-1.05, 0, -2]),'pprecnik': 0.3, 'boja': np.array([1, 1, 1]), 'reflektivnost': 1, 'transparentnost': 1, 'indeks': 1.3},
 ]
 
 izvoriSvetlosti = [
@@ -62,10 +63,13 @@ def presekZrakaISfere(zrak, sfera):
         b = 2 * np.dot(zrak['pravac'], zrak['tacka'] - sfera['centar'])
         c = np.dot(zrak['tacka'] - sfera['centar'],
                    zrak['tacka'] - sfera['centar']) - sfera['pprecnik']**2
-        t1, _ = resenjaKvadratneJednacine(a, b, c)
+        t1, t2 = resenjaKvadratneJednacine(a, b, c)
 
         if t1 is None:
             return (0, None)
+
+        if t1 < 0:
+            t1 = t2
 
         return (1, zrak['tacka'] + t1 * zrak['pravac'])
 
@@ -146,6 +150,30 @@ def bojaZraka(zrak, dubina):
                 'tacka': tackaPrvogPreseka
             }
             boja = (1 - najblizaSfera['reflektivnost']) * boja + najblizaSfera['reflektivnost'] * bojaZraka(reflektovanZrak, dubina - 1)
+
+        if 'transparentnost' in najblizaSfera:
+            if kosinusUgla(normalaSfere, zrak['pravac']) > 0:
+                normalaSfere = - normalaSfere
+                indeks = najblizaSfera['indeks']
+            else:
+                indeks = 1 / najblizaSfera['indeks']
+
+            kosinus = min([np.dot(normalaSfere, -1 * zrak['pravac']), 1])
+            sinus = math.sqrt(1 - kosinus**2)
+            if sinus <= 1:
+                vNormalan = indeks * (zrak['pravac'] + kosinus * normalaSfere)
+                vTransvezalan = -1 * math.sqrt(abs(1 - np.dot(vNormalan, vNormalan))) * normalaSfere
+                propustenZrak = {
+                    'pravac': vNormalan + vTransvezalan,
+                    'tacka': tackaPrvogPreseka - 0.0001 * najblizaSfera['pprecnik'] * normalaSfere
+                }
+                boja = (1 - najblizaSfera['transparentnost']) * boja + najblizaSfera['transparentnost'] * bojaZraka(propustenZrak, dubina - 1)
+            else:
+                reflektovanZrak = {
+                    'pravac': zrak['pravac'] - 2 * np.dot(zrak['pravac'], normalaSfere) * normalaSfere,
+                    'tacka': tackaPrvogPreseka
+                }
+                boja = bojaZraka(reflektovanZrak, dubina - 1)
 
     return boja
 
